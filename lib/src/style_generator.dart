@@ -6,14 +6,15 @@ import 'package:source_gen/source_gen.dart';
 
 import 'model_visitor.dart';
 
-class SubSizingGenerator extends GeneratorForAnnotation<StyleAnnotation> {
+class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
   @override
   generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
-    return _generatedSource(element);
+    return _generatedSource(element,
+        annotation.objectValue.getField("nullable")?.toBoolValue() ?? false);
   }
 
-  Iterable<String> _generatedSource(Element element) {
+  Iterable<String> _generatedSource(Element element, bool nullable) {
     List<String> content = [];
     var visitor = ModelVisitor();
 
@@ -72,6 +73,10 @@ class SubSizingGenerator extends GeneratorForAnnotation<StyleAnnotation> {
       var variable =
           field.startsWith('_') ? field.replaceFirst('_', '') : field;
       String type = visitor.fields[field].toString();
+      if (nullable) {
+        type = "$type?";
+      }
+      print(type);
 
       // getter
       classBuffer.writeln("@override");
@@ -87,7 +92,7 @@ class SubSizingGenerator extends GeneratorForAnnotation<StyleAnnotation> {
       var variable =
           field.startsWith('_') ? field.replaceFirst('_', '') : field;
       String type = visitor.fields[field].toString();
-      if (type.contains('?')) {
+      if (type.contains('?') || nullable) {
         classBuffer.writeln("this.$variable,");
       } else {
         classBuffer.writeln("required this.$variable,");
@@ -117,7 +122,10 @@ class SubSizingGenerator extends GeneratorForAnnotation<StyleAnnotation> {
       classBuffer.writeln("class $className7{");
       for (var comp in visitor.components.keys) {
         String type = visitor.components[comp].toString();
-        type = type.contains("?") ? "${type}InfoNull" : "${type}InfoNull?";
+        if (type.contains("?")) {
+          type = type.replaceAll("?", "");
+        }
+        type = "${type}InfoNull?";
         classBuffer.writeln("final $type $comp;");
       }
       classBuffer.write("$className7({");
@@ -138,7 +146,11 @@ class SubSizingGenerator extends GeneratorForAnnotation<StyleAnnotation> {
         // remove '_' from private variables
         var variable = comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
         String type = visitor.components[comp].toString();
-        type = type.contains("?") ? "${type}Override" : "${type}Override?";
+        if (type.contains("?")) {
+          type = type.replaceAll("?", "");
+        }
+        type = "${type}Override?";
+
         // getter
         classBuffer.writeln("@override");
         classBuffer.writeln("final $type $variable;");
@@ -166,7 +178,13 @@ class SubSizingGenerator extends GeneratorForAnnotation<StyleAnnotation> {
       for (var comp in visitor.components.keys) {
         // remove '_' from private variables
         var variable = comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
-        String type = "${visitor.components[comp]}Style";
+        String type = visitor.components[comp].toString();
+        if (type.contains("?")) {
+          type = type.replaceAll("?", "");
+          type = "${type}Style?";
+        } else {
+          type = "${type}Style";
+        }
 
         // getter
         classBuffer.writeln("@override");
@@ -210,7 +228,12 @@ class SubSizingGenerator extends GeneratorForAnnotation<StyleAnnotation> {
           "final $className5 Function($className sizing)? buildComponents;");
       for (var comp in visitor.components.keys) {
         var variable = comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
-        String type = "${visitor.components[comp]}Override";
+        String type = visitor.components[comp].toString();
+        if (type.contains("?")) {
+          type = type.replaceAll("?", "");
+        }
+        type = "${type}Override";
+
         classBuffer.writeln("@override");
         classBuffer.writeln("late final $type? $variable;");
       }
@@ -266,7 +289,13 @@ class SubSizingGenerator extends GeneratorForAnnotation<StyleAnnotation> {
 
       for (var comp in visitor.components.keys) {
         var variable = comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
-        String type = "${visitor.components[comp]}Style";
+        String type = visitor.components[comp].toString();
+        if (type.contains("?")) {
+          type = type.replaceAll("?", "");
+          type = "${type}Style?";
+        } else {
+          type = "${type}Style";
+        }
 
         classBuffer.writeln("@override");
         classBuffer.writeln("late final $type $variable;");
@@ -314,11 +343,22 @@ class SubSizingGenerator extends GeneratorForAnnotation<StyleAnnotation> {
     }
     if (visitor.components.isNotEmpty) {
       classBuffer.writeln("buildComponents: (_){return $className6(");
+      bool isNullable = false;
       for (var comp in visitor.components.keys) {
-        String type = "${visitor.components[comp]}Style";
+        String type = visitor.components[comp].toString();
+        if (type.contains("?")) {
+          type = type.replaceAll("?", "");
+          isNullable = true;
+        }
+        type = "${type}Style";
 
-        classBuffer
-            .writeln("$comp: $type.override(def.$comp, override.$comp),");
+        if (isNullable) {
+          classBuffer.writeln(
+              "$comp: def.$comp == null ? null : $type.override(def.$comp!, override.$comp),");
+        } else {
+          classBuffer
+              .writeln("$comp:  $type.override(def.$comp, override.$comp),");
+        }
       }
       classBuffer.writeln(");},");
     }
