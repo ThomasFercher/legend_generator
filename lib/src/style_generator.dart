@@ -6,6 +6,9 @@ import 'package:source_gen/source_gen.dart';
 
 import 'model_visitor.dart';
 
+String seperator(String name) =>
+    "\n// **************************************************************************\n// $name\n// **************************************************************************\n";
+
 class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
   @override
   generateForAnnotatedElement(
@@ -22,12 +25,12 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
 
     var className = "${visitor.className}InfoNull";
 
-    var classBuffer = StringBuffer();
+    var buffer = StringBuffer();
 
     /// InfoNull
     ///
 
-    classBuffer.writeln("abstract class $className{");
+    buffer.writeln("abstract class $className{");
 
     for (var field in visitor.fields.keys) {
       // remove '_' from private variables
@@ -36,11 +39,11 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
       String type = visitor.fields[field].toString();
       type = type.contains('?') ? type : "$type?";
       // getter
-      classBuffer.writeln("final $type $variable;");
+      buffer.writeln("final $type $variable;");
     }
 
     // constructor
-    classBuffer.writeln("const $className({");
+    buffer.writeln("const $className({");
 
     // assign variables to Map
     for (var field in visitor.fields.keys) {
@@ -49,24 +52,24 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
           field.startsWith('_') ? field.replaceFirst('_', '') : field;
       String type = visitor.fields[field].toString();
       if (type.contains('?')) {
-        classBuffer.writeln("this.$variable,");
+        buffer.writeln("this.$variable,");
       } else {
-        classBuffer.writeln("required this.$variable,");
+        buffer.writeln("required this.$variable,");
       }
     }
     // constructor close
-    classBuffer.writeln("});");
+    buffer.writeln("});");
 
     // class ends here
-    classBuffer.writeln("}");
+    buffer.writeln("}");
 
-    content.add(classBuffer.toString());
-    classBuffer.clear();
+    content.add(buffer.toString());
+    buffer.clear();
 
     /// Not Null
     ///
     var className2 = "${visitor.className}Info";
-    classBuffer.writeln("abstract class $className2 implements $className{");
+    buffer.writeln("abstract class $className2 implements $className{");
 
     for (var field in visitor.fields.keys) {
       // remove '_' from private variables
@@ -79,12 +82,12 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
       print(type);
 
       // getter
-      classBuffer.writeln("@override");
-      classBuffer.writeln("final $type $variable;");
+      buffer.writeln("@override");
+      buffer.writeln("final $type $variable;");
     }
 
     // constructor
-    classBuffer.writeln("const $className2({");
+    buffer.writeln("const $className2({");
 
     // assign variables to Map
     for (var field in visitor.fields.keys) {
@@ -93,19 +96,19 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
           field.startsWith('_') ? field.replaceFirst('_', '') : field;
       String type = visitor.fields[field].toString();
       if (type.contains('?') || nullable) {
-        classBuffer.writeln("this.$variable,");
+        buffer.writeln("this.$variable,");
       } else {
-        classBuffer.writeln("required this.$variable,");
+        buffer.writeln("required this.$variable,");
       }
     }
     // constructor close
-    classBuffer.writeln("});");
+    buffer.writeln("});");
 
     // class ends here
-    classBuffer.writeln("}");
+    buffer.writeln("}");
 
-    content.add(classBuffer.toString());
-    classBuffer.clear();
+    content.add(buffer.toString());
+    buffer.clear();
 
     // class ends here
 
@@ -119,29 +122,29 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
 
     if (visitor.components.isNotEmpty) {
       className7 = "${visitor.className}ComponentsInfo";
-      classBuffer.writeln("class $className7{");
+      buffer.writeln("class $className7{");
       for (var comp in visitor.components.keys) {
         String type = visitor.components[comp].toString();
         if (type.contains("?")) {
           type = type.replaceAll("?", "");
         }
         type = "${type}InfoNull?";
-        classBuffer.writeln("final $type $comp;");
+        buffer.writeln("final $type $comp;");
       }
-      classBuffer.write("$className7({");
+      buffer.write("$className7({");
       // assign variables to Map
       for (var comp in visitor.components.keys) {
         // remove '_' from private variables
         var variable = comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
-        classBuffer.writeln("this.$variable,");
+        buffer.writeln("this.$variable,");
       }
       // constructor close
-      classBuffer.writeln("});");
+      buffer.writeln("});");
 
-      classBuffer.writeln("}");
+      buffer.writeln("}");
 
       className5 = "${visitor.className}ComponentsOverride";
-      classBuffer.writeln("class $className5 implements $className7{");
+      buffer.writeln("class $className5 implements $className7{");
       for (var comp in visitor.components.keys) {
         // remove '_' from private variables
         var variable = comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
@@ -152,29 +155,29 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
         type = "${type}Override?";
 
         // getter
-        classBuffer.writeln("@override");
-        classBuffer.writeln("final $type $variable;");
+        buffer.writeln("@override");
+        buffer.writeln("final $type $variable;");
       }
       if (visitor.components.keys.isNotEmpty) {
-        classBuffer.write("$className5({");
+        buffer.write("$className5({");
         // assign variables to Map
         for (var comp in visitor.components.keys) {
           // remove '_' from private variables
           var variable =
               comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
-          classBuffer.writeln("this.$variable,");
+          buffer.writeln("this.$variable,");
         }
         // constructor close
-        classBuffer.writeln("});");
+        buffer.writeln("});");
       }
       // class ends here
-      classBuffer.writeln("}");
-      content.add(classBuffer.toString());
-      classBuffer.clear();
+      buffer.writeln("}");
+      content.add(buffer.toString());
+      buffer.clear();
 
       //
       className6 = "${visitor.className}Components";
-      classBuffer.writeln("class $className6 implements $className7{");
+      buffer.writeln("class $className6 implements $className7{");
       for (var comp in visitor.components.keys) {
         // remove '_' from private variables
         var variable = comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
@@ -187,11 +190,11 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
         }
 
         // getter
-        classBuffer.writeln("@override");
-        classBuffer.writeln("final $type $variable;");
+        buffer.writeln("@override");
+        buffer.writeln("final $type $variable;");
       }
       if (visitor.components.keys.isNotEmpty) {
-        classBuffer.write("$className6({");
+        buffer.write("$className6({");
         // assign variables to Map
         for (var comp in visitor.components.keys) {
           // remove '_' from private variables
@@ -199,18 +202,18 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
               comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
           String type = visitor.components[comp].toString();
           if (type.contains('?')) {
-            classBuffer.writeln("this.$variable,");
+            buffer.writeln("this.$variable,");
           } else {
-            classBuffer.writeln("required this.$variable,");
+            buffer.writeln("required this.$variable,");
           }
         }
         // constructor close
-        classBuffer.writeln("});");
+        buffer.writeln("});");
       }
       // class ends here
-      classBuffer.writeln("}");
-      content.add(classBuffer.toString());
-      classBuffer.clear();
+      buffer.writeln("}");
+      content.add(buffer.toString());
+      buffer.clear();
     }
     //
 
@@ -218,13 +221,13 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
     ///
 
     var className3 = "${visitor.className}Override";
-    classBuffer.writeln("class $className3 extends $className");
+    buffer.writeln("class $className3 extends $className");
     if (visitor.components.isNotEmpty) {
-      classBuffer.write("implements $className5");
+      buffer.write("implements $className5");
     }
-    classBuffer.write("{");
+    buffer.write("{");
     if (visitor.components.isNotEmpty) {
-      classBuffer.writeln(
+      buffer.writeln(
           "final $className5 Function($className sizing)? buildComponents;");
       for (var comp in visitor.components.keys) {
         var variable = comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
@@ -234,42 +237,41 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
         }
         type = "${type}Override";
 
-        classBuffer.writeln("@override");
-        classBuffer.writeln("late final $type? $variable;");
+        buffer.writeln("@override");
+        buffer.writeln("late final $type? $variable;");
       }
     }
 
     // constructor
-    classBuffer.writeln("$className3({");
+    buffer.writeln("$className3({");
     if (visitor.components.isNotEmpty) {
-      classBuffer.writeln("this.buildComponents,");
+      buffer.writeln("this.buildComponents,");
     }
     // assign variables to Map
     for (var field in visitor.fields.keys) {
       // remove '_' from private variables
       var variable =
           field.startsWith('_') ? field.replaceFirst('_', '') : field;
-      classBuffer.writeln("super.$variable,");
+      buffer.writeln("super.$variable,");
     }
 
     // constructor close
-    classBuffer.writeln("})");
+    buffer.writeln("})");
     if (visitor.components.isNotEmpty) {
-      classBuffer.write("{");
-      classBuffer
-          .writeln("$className5? components = buildComponents?.call(this);");
+      buffer.write("{");
+      buffer.writeln("$className5? components = buildComponents?.call(this);");
       for (var comp in visitor.components.keys) {
-        classBuffer.writeln("$comp = components?.$comp;");
+        buffer.writeln("$comp = components?.$comp;");
       }
-      classBuffer.writeln("}");
+      buffer.writeln("}");
     } else {
-      classBuffer.write(";");
+      buffer.write(";");
     }
 
     // class ends here
-    classBuffer.writeln("}");
-    content.add(classBuffer.toString());
-    classBuffer.clear();
+    buffer.writeln("}");
+    content.add(buffer.toString());
+    buffer.clear();
 
     ///
     /// MainClass
@@ -277,16 +279,13 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
     ///
     ///
     var className4 = "${visitor.className}Style";
-    classBuffer.writeln("class $className4 extends $className2");
+    buffer.writeln("class $className4 extends $className2");
     if (visitor.components.isNotEmpty) {
-      classBuffer.write("implements $className6");
+      buffer.write("implements $className6");
     }
-    classBuffer.write("{");
+    buffer.write("{");
 
     if (visitor.components.isNotEmpty) {
-      classBuffer.writeln(
-          "final $className6 Function($className2 sizing) buildComponents;");
-
       for (var comp in visitor.components.keys) {
         var variable = comp.startsWith('_') ? comp.replaceFirst('_', '') : comp;
         String type = visitor.components[comp].toString();
@@ -297,14 +296,15 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
           type = "${type}Style";
         }
 
-        classBuffer.writeln("@override");
-        classBuffer.writeln("late final $type $variable;");
+        buffer.writeln("@override");
+        buffer.writeln("late final $type $variable;");
       }
     }
     // constructor
-    classBuffer.writeln("$className4({");
+    buffer.writeln("$className4({");
     if (visitor.components.isNotEmpty) {
-      classBuffer.writeln("required this.buildComponents,");
+      buffer.writeln(
+          "required $className6 Function($className2 sizing) buildComponents,");
     }
     // assign variables to Map
     for (var field in visitor.fields.keys) {
@@ -313,36 +313,65 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
           field.startsWith('_') ? field.replaceFirst('_', '') : field;
       String type = visitor.fields[field].toString();
       if (type.contains('?')) {
-        classBuffer.writeln("super.$variable,");
+        buffer.writeln("super.$variable,");
       } else {
-        classBuffer.writeln("required super.$variable,");
+        buffer.writeln("required super.$variable,");
       }
     }
 
     // constructor close
-    classBuffer.writeln("})");
+    buffer.writeln("})");
     if (visitor.components.isNotEmpty) {
-      classBuffer.write("{");
-      classBuffer
-          .writeln("$className6 components = buildComponents.call(this);");
+      buffer.write("{");
+      buffer.writeln("$className6 components = buildComponents.call(this);");
       for (var comp in visitor.components.keys) {
-        classBuffer.writeln("$comp = components.$comp;");
+        buffer.writeln("$comp = components.$comp;");
       }
-      classBuffer.writeln("}");
+      buffer.writeln("}");
     } else {
-      classBuffer.write(";");
+      buffer.write(";");
     }
 
-    classBuffer.writeln(
-        "factory $className4.override($className4 def,$className3? override,){");
-    classBuffer.writeln("if(override==null){return def;}");
-
-    classBuffer.writeln("return $className4(");
+    // Second Constructor
+    buffer.writeln("$className4.copy({");
     for (var field in visitor.fields.keys) {
-      classBuffer.writeln("$field: override.$field ?? def.$field,");
+      // remove '_' from private variables
+      var variable =
+          field.startsWith('_') ? field.replaceFirst('_', '') : field;
+      String type = visitor.fields[field].toString();
+      if (type.contains('?')) {
+        buffer.writeln("super.$variable,");
+      } else {
+        buffer.writeln("required super.$variable,");
+      }
+    }
+
+    if (visitor.components.isNotEmpty) {
+      for (var field in visitor.components.keys) {
+        String type = visitor.components[field].toString();
+        if (type.contains('?')) {
+          buffer.writeln("this.$field,");
+        } else {
+          buffer.writeln("required this.$field,");
+        }
+      }
+    }
+
+    buffer.writeln("});");
+
+    // Override Method
+    buffer.write(seperator("Override"));
+
+    buffer.writeln(
+        "factory $className4.override($className4 def,$className3? override,){");
+    buffer.writeln("if(override==null){return def;}");
+
+    buffer.writeln("return $className4(");
+    for (var field in visitor.fields.keys) {
+      buffer.writeln("$field: override.$field ?? def.$field,");
     }
     if (visitor.components.isNotEmpty) {
-      classBuffer.writeln("buildComponents: (_){return $className6(");
+      buffer.writeln("buildComponents: (_){return $className6(");
       bool isNullable = false;
       for (var comp in visitor.components.keys) {
         String type = visitor.components[comp].toString();
@@ -353,22 +382,63 @@ class StyleGenerator extends GeneratorForAnnotation<LegendStyle> {
         type = "${type}Style";
 
         if (isNullable) {
-          classBuffer.writeln(
+          buffer.writeln(
               "$comp: def.$comp == null ? null : $type.override(def.$comp!, override.$comp),");
         } else {
-          classBuffer
-              .writeln("$comp:  $type.override(def.$comp, override.$comp),");
+          buffer.writeln("$comp:  $type.override(def.$comp, override.$comp),");
         }
       }
-      classBuffer.writeln(");},");
+      buffer.writeln(");},");
     }
 
-    classBuffer.writeln(");");
-    classBuffer.writeln("}");
+    buffer.writeln(");");
+    buffer.writeln("}");
+
+    // Copy With Method
+    buffer.write(seperator("Copy With"));
+    buffer.write("$className4 copyWith({");
+    // Vars
+    for (var field in visitor.fields.keys) {
+      var type = visitor.fields[field].toString();
+      if (!type.contains('?')) {
+        type += "?";
+      }
+      buffer.writeln("$type $field,");
+    }
+    // Components
+    if (visitor.components.isNotEmpty) {
+      for (var field in visitor.components.keys) {
+        String type = visitor.components[field].toString();
+        if (!type.contains('?')) {
+          type += "Style?";
+        } else {
+          type = type.replaceAll("?", "Style?");
+        }
+        buffer.writeln("$type $field,");
+      }
+    }
+    buffer.writeln("}){");
+
+    buffer.writeln("return $className4.copy(");
+    // Vars
+    for (var field in visitor.fields.keys) {
+      buffer.writeln("$field: $field ?? this.$field,");
+    }
+    // Components
+    if (visitor.components.isNotEmpty) {
+      for (var field in visitor.components.keys) {
+        buffer.writeln("$field: $field ?? this.$field,");
+      }
+    }
+
+    buffer.writeln(");");
+
+    buffer.writeln("}");
+
     // class ends here
-    classBuffer.writeln("}");
-    content.add(classBuffer.toString());
-    classBuffer.clear();
+    buffer.writeln("}");
+    content.add(buffer.toString());
+    buffer.clear();
 
     return content;
   }
