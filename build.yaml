@@ -9,6 +9,15 @@ builders:
   generators:
     target: ":generators"
     import: "package:legend_generator/builder.dart"
+    builder_factories: ["copyClassGen"]
+    build_extensions: { ".dart": [".g.dart"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
+
+  copyBuilder:
+    target: ":copyBuilder"
+    import: "package:legend_generator/builder.dart"
     builder_factories: ["styleClassGen"]
     build_extensions: { ".dart": [".g.dart"] }
     auto_apply: dependents
